@@ -1,0 +1,31 @@
+﻿@using EasyVend.FrontEnd.Pages.Dashboard
+@using System
+
+@code {
+    [Parameter] public string SelectedPage { get; set; } = "Overview";
+}
+
+@switch ((SelectedPage ?? "Overview").ToLowerInvariant())
+{
+    case "listings":
+        <Listings />
+        break;
+    case "billing":
+        <Billing />
+        break;
+    case "marketplaces":
+        <Marketplaces />
+        break;
+    case "sales":
+        <Sales />
+        break;
+    case "shipping":
+        <Shipping />
+        break;
+    case "settings":
+        <Settings />
+        break;
+    default:
+        <Overview />
+        break;
+}

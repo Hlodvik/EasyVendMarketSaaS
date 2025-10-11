@@ -1,0 +1,35 @@
+<!-- Hero Section -->
+@code {
+    // Path to the image in wwwroot
+    private string MarketImage => "assets/images/market.jpg";
+    private string SectionStyle =>
+        $"background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.5)), url('{MarketImage}');" +
+        "background-size: cover;" +
+        "background-position: center;" +
+        "background-repeat: no-repeat;" +
+        "width: 100vw;" +
+        "height: 100vh;" +
+        "margin-left: calc(-50vw + 50%);" +
+        "z-index: -1;";
+}
+
+<section class="py-5" style="@SectionStyle">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-center align-items-center">
+            <div class="col-lg-9 text-center text-lg-start hero-panel">
+                <p class="display-4 lead cfc">
+                    One dashboard.
+                </p>
+                <p class="display-4 lead cfc">
+                    Every marketplace.
+                </p>
+                <p class="display-4 lead cfc">
+                    Total control.
+                </p>
+                <div class="mt-4 d-flex justify-content-center">
+                    <a href="#features" class="btn-custom btn-lg">What We Offer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,87 @@
+﻿@page "/setup-profile"
+@attribute [Authorize]
+@inject EasyVend.Services.UserService UserService
+@inject NavigationManager Nav
+
+<h3>Set up your profile</h3>
+
+@if (_skip)
+{
+    <p>Redirecting…</p>
+}
+else
+{
+    <EditForm Model="_m" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">User name</label>
+            <InputText class="form-control" @bind-Value="_m.DisplayName" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Preferred contact email</label>
+            <InputText class="form-control" @bind-Value="_m.PreferredContactEmail" />
+        </div>
+
+        <button class="btn btn-success" type="submit">Save and continue</button>
+    </EditForm>
+
+    @if (!string.IsNullOrEmpty(_msg))
+    {
+        <div class="alert alert-info mt-3">@_msg</div>
+    }
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+    private Guid _userId;
+    private bool _skip;
+    private string? _msg;
+    private Model _m = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateTask;
+        var user = await UserService.EnsureUserExistsAsync(auth.User);
+        _userId = user.Id;
+
+        if (UserService.IsProfileComplete(user))
+        {
+            _skip = true;
+            Nav.NavigateTo("/dashboard", replace: true);
+            return;
+        }
+
+        _m.DisplayName = string.IsNullOrWhiteSpace(user.DisplayName)
+            ? (auth.User.Identity?.Name ?? "")
+            : user.DisplayName;
+
+        _m.PreferredContactEmail = string.IsNullOrWhiteSpace(user.PreferredContactEmail)
+            ? user.Email
+            : user.PreferredContactEmail;
+    }
+
+    private async Task Save()
+    {
+        bool complete = !string.IsNullOrWhiteSpace(_m.DisplayName) &&
+                        !string.IsNullOrWhiteSpace(_m.PreferredContactEmail);
+
+        var (ok, msg) = await UserService.UpdateProfileAsync(
+            _userId,
+            _m.DisplayName,
+            _m.PreferredContactEmail,
+            completeOnboarding: complete
+        );
+
+        _msg = msg;
+        if (ok) Nav.NavigateTo("/dashboard", replace: true);
+    }
+
+    public sealed class Model
+    {
+        [Required] public string DisplayName { get; set; } = "";
+        [Required, EmailAddress] public string PreferredContactEmail { get; set; } = "";
+    }
+}

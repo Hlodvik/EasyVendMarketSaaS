@@ -1,0 +1,174 @@
+﻿@using System.ComponentModel.DataAnnotations
+@inject EasyVend.Services.UserService UserService
+@inject NavigationManager Nav
+
+@if (Visible)
+{
+    <div class="user-settings-panel">
+        <h3>Account settings</h3>
+
+        <EditForm Model="_m" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label>Preferred contact email</label>
+                    <InputText class="form-control" @bind-Value="_m.PreferredContactEmail" />
+                </div>
+                <div class="col-md-6">
+                    <label>Company name</label>
+                    <InputText class="form-control" @bind-Value="_m.CompanyName" />
+                </div>
+
+                <div class="col-md-8">
+                    <label>Address line 1</label>
+                    <InputText class="form-control" @bind-Value="_m.AddressLine1" />
+                </div>
+                <div class="col-md-4">
+                    <label>Address line 2</label>
+                    <InputText class="form-control" @bind-Value="_m.AddressLine2" />
+                </div>
+
+                <div class="col-md-4">
+                    <label>City</label>
+                    <InputText class="form-control" @bind-Value="_m.City" />
+                </div>
+                <div class="col-md-4">
+                    <label>Region/State</label>
+                    <InputText class="form-control" @bind-Value="_m.Region" />
+                </div>
+                <div class="col-md-4">
+                    <label>Postal code</label>
+                    <InputText class="form-control" @bind-Value="_m.PostalCode" />
+                </div>
+
+                <div class="col-md-6">
+                    <label>Country</label>
+                    <InputText class="form-control" @bind-Value="_m.Country" />
+                </div>
+
+                <div class="col-md-6">
+                    <label>Marketplaces</label>
+                    <div class="d-flex gap-2 flex-wrap">
+                        @foreach (var m in _allMarkets)
+                        {
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="checkbox"
+                                       checked="@_m.PreferredMarketplaces.Contains(m)"
+                                       @onchange="e => ToggleMarket(m, (bool)e.Value!)" />
+                                <label class="form-check-label">@m</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3 d-flex gap-2">
+                <button class="btn btn-success" type="submit">Save</button>
+                <button class="btn btn-link" type="button" @onclick="Close">Cancel</button>
+            </div>
+        </EditForm>
+
+        @if (!string.IsNullOrEmpty(_msg))
+        {
+            <div class="alert alert-info mt-3">@_msg</div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public EventCallback OnSaved { get; set; }  // notify parent
+
+    [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+
+    private Guid _userId;
+    private string? _msg;
+
+    private readonly string[] _allMarkets = new[] { "Amazon", "eBay", "Etsy", "Walmart", "Shopify" };
+
+    private Model _m = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!Visible) return;
+
+        var auth = await AuthStateTask;
+        var user = await UserService.EnsureUserExistsAsync(auth.User); // idempotent
+        _userId = user.Id;
+
+        // seed form fields
+        _m.PreferredContactEmail = user.PreferredContactEmail ?? user.Email;
+        _m.CompanyName = user.CompanyName ?? "";
+        _m.AddressLine1 = user.AddressLine1 ?? "";
+        _m.AddressLine2 = user.AddressLine2 ?? "";
+        _m.City = user.City ?? "";
+        _m.Region = user.Region ?? "";
+        _m.PostalCode = user.PostalCode ?? "";
+        _m.Country = user.Country ?? "";
+        _m.PreferredMarketplaces = (user.PreferredMarketplaces ?? "")
+            .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private void ToggleMarket(string market, bool on)
+    {
+        if (on) _m.PreferredMarketplaces.Add(market);
+        else _m.PreferredMarketplaces.Remove(market);
+        StateHasChanged();
+    }
+
+    private async Task Save()
+    {
+        var marketplaces = _m.PreferredMarketplaces.ToArray();
+
+        // If required fields are filled, mark onboarding complete
+        bool requiredPresent =
+            !string.IsNullOrWhiteSpace(_m.PreferredContactEmail) &&
+            !string.IsNullOrWhiteSpace(_m.CompanyName) &&
+            !string.IsNullOrWhiteSpace(_m.AddressLine1) &&
+            !string.IsNullOrWhiteSpace(_m.City) &&
+            !string.IsNullOrWhiteSpace(_m.Region) &&
+            !string.IsNullOrWhiteSpace(_m.PostalCode) &&
+            !string.IsNullOrWhiteSpace(_m.Country);
+
+        (bool ok, string msg) = await UserService.UpdateProfileAsync(
+            _userId,
+            _m.PreferredContactEmail,
+            _m.CompanyName,
+            _m.AddressLine1,
+            _m.AddressLine2,
+            _m.City,
+            _m.Region,
+            _m.PostalCode,
+            _m.Country,
+            marketplaces,
+            completeOnboarding: requiredPresent
+        );
+
+        _msg = msg;
+
+        if (ok)
+        {
+            await OnSaved.InvokeAsync();
+            await VisibleChanged.InvokeAsync(false); // close panel
+        }
+    }
+
+    private Task Close() => VisibleChanged.InvokeAsync(false);
+
+    public sealed class Model
+    {
+        [Required, EmailAddress] public string PreferredContactEmail { get; set; } = "";
+        [Required] public string CompanyName { get; set; } = "";
+        [Required] public string AddressLine1 { get; set; } = "";
+        public string AddressLine2 { get; set; } = "";
+        [Required] public string City { get; set; } = "";
+        [Required] public string Region { get; set; } = "";
+        [Required] public string PostalCode { get; set; } = "";
+        [Required] public string Country { get; set; } = "";
+        public HashSet<string> PreferredMarketplaces { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    }
+}

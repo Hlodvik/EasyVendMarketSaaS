@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<InvariantGlobalization>false</InvariantGlobalization>
+		<RootNamespace>EasyVend</RootNamespace>
+		<UserSecretsId>EasyVend-LocalSecrets</UserSecretsId>
+ 
+		<BlazorEnableCompression>true</BlazorEnableCompression>
+		<BlazorWebAssemblyLoadAllGlobalizationData>false</BlazorWebAssemblyLoadAllGlobalizationData>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="3.14.1" />
+		<PackageReference Include="Microsoft.Identity.Web.UI" Version="3.14.1" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+	</ItemGroup>
+ 
+	<ItemGroup>
+		<ProjectReference Include="..\EasyVend.Client\EasyVend.Client.csproj" />
+	</ItemGroup>
+ 
+	<ItemGroup>
+	  <Folder Include="FrontEnd\Components\Dashboard\Widgits\" />
+	  <Folder Include="Migrations\" />
+	</ItemGroup>
+ 
+	<Target Name="CopyClientAppDist" AfterTargets="Publish">
+		<ItemGroup>
+			<ClientDistFiles Include="..\EasyVend.Client\bin\$(Configuration)\net9.0\browser-wasm\AppBundle\**" />
+		</ItemGroup>
+		<Copy SourceFiles="@(ClientDistFiles)" DestinationFolder="$(PublishDir)wwwroot\%(RecursiveDir)" SkipUnchangedFiles="true" />
+	</Target>
+
+</Project>

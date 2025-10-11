@@ -1,0 +1,34 @@
+﻿@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Routing
+@using EasyVend.FrontEnd.Components
+@using Microsoft.AspNetCore.Components.Authorization
+
+<CascadingAuthenticationState>
+<nav class="navbar navbar-expand-lg navbar-light position-fixed top-0 start-0 w-100">
+    <div class="container-fluid">
+        <!-- Logo/Home -->
+        <NavLink class="navbar-brand" href="/">EasyVend</NavLink>
+
+        <!-- Toggler for mobile -->
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links -->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <Login />
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+</CascadingAuthenticationState>

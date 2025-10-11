@@ -1,0 +1,31 @@
+﻿@using Microsoft.AspNetCore.Components
+
+<div class="sidebar border-end">
+    <div class="sidebar-header">
+        <h2>EasyVend</h2>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li class="@GetClass("Overview")" role="button" tabindex="0" @onclick="@(() => SelectPage("Overview"))">Overview</li>
+        <li class="@GetClass("Listings")" role="button" tabindex="0" @onclick="@(() => SelectPage("Listings"))">Listings</li>
+        <li class="@GetClass("Billing")" role="button" tabindex="0" @onclick="@(() => SelectPage("Billing"))">Billing</li>
+        <li class="@GetClass("Marketplaces")" role="button" tabindex="0" @onclick="@(() => SelectPage("Marketplaces"))">Marketplaces</li>
+        <li class="@GetClass("Sales")" role="button" tabindex="0" @onclick="@(() => SelectPage("Sales"))">Sales</li>
+        <li class="@GetClass("Shipping")" role="button" tabindex="0" @onclick="@(() => SelectPage("Shipping"))">Shipping</li>
+        <li class="@GetClass("Settings")" role="button" tabindex="0" @onclick="@(() => SelectPage("Settings"))">Settings</li>
+    </ul>
+</div>
+
+@code {
+    [Parameter] public string SelectedPage { get; set; } = "Overview";
+    [Parameter] public EventCallback<string> SelectedPageChanged { get; set; }
+
+    private async Task SelectPage(string page)
+    {
+        SelectedPage = page;
+        await SelectedPageChanged.InvokeAsync(page);
+    }
+
+    private string GetClass(string page) =>
+        page == SelectedPage ? "nav-item active" : "nav-item";
+}

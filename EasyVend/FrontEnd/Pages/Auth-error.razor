@@ -1,0 +1,14 @@
+﻿@page "/auth-error"
+@attribute [AllowAnonymous]
+@inject NavigationManager Nav
+<h3>Auth error</h3>
+<p>@Message</p>
+@code {
+    string? Message;
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(Nav.Uri);
+        var q = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        Message = q["msg"];
+    }
+}

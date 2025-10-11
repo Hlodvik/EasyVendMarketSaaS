@@ -1,0 +1,40 @@
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <NotAuthorized>
+        <a class="btn btn-primary" href="@_signInHref">Sign In</a>
+    </NotAuthorized>
+    <Authorized>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle me-2"></i>@_displayName
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/dashboard">Dashboard</a></li>
+                <li><a class="dropdown-item" href="/setup-profile">Edit account</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><button class="dropdown-item" @onclick="SignOut">Sign out</button></li>
+            </ul>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private string _displayName = "Account";
+    private string _signInHref = "/signin?returnUrl=%2Fsetup-profile";
+
+    protected override void OnParametersSet()
+    {
+        // Build a safe returnUrl; fall back to setup-profile
+        var current = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var returnUrl = string.IsNullOrWhiteSpace(current) ? "/setup-profile" : "/" + current.TrimStart('/');
+        _signInHref = $"/signin?returnUrl={Uri.EscapeDataString(returnUrl)}";
+    }
+
+    private void SignOut()
+    {
+        Navigation.NavigateTo("/signout", forceLoad: true);
+    }
+}
