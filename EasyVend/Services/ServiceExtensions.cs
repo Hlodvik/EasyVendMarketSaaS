@@ -1,4 +1,5 @@
 ﻿using EasyVend.Services;
+using EasyVend.Services.Integrations;
 
 namespace EasyVend.Services;
 public static class ServiceExtensions
@@ -6,7 +7,8 @@ public static class ServiceExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<UserService>();
-        // add app services here later
+        services.AddScoped<ListingPublisher>();
+        services.AddHttpClient<IEtsyClient, EtsyClient>();
         return services;
     }
 }

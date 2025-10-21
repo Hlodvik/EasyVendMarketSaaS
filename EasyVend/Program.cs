@@ -67,7 +67,8 @@ try
 
     // Minimal auth endpoints (/signin, /signout) and Razor components
     app.MapAuthEndpoints()
-       .MapComponentEndpoints();
+       .MapComponentEndpoints()
+       .MapListingEndpoints(); // Listings API endpoints (publish to Etsy)
 
     app.Run();
 }

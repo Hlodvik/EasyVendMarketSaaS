@@ -1,5 +1,66 @@
 @page "/dashboard/listings"
 @attribute [Authorize]
+@using System.Net.Http.Json
+@inject HttpClient Http
 
 <h2>Listings</h2>
 <p>Manage and sync your product listings across marketplaces.</p>
+
+<div class="card p-3 my-3">
+    <label class="form-label">Test Publish to Etsy</label>
+    <div class="input-group mb-2">
+        <span class="input-group-text">Product Id</span>
+        <input class="form-control" @bind-value="_productIdText" @bind-value:event="oninput" placeholder="00000000-0000-0000-0000-000000000000" />
+        <button class="btn btn-primary" @onclick="PublishToEtsy" disabled="@_busy">Post to Etsy</button>
+    </div>
+    @if (!string.IsNullOrEmpty(_result))
+    {
+        <div class="alert @(_ok ? "alert-success" : "alert-danger")">@_result</div>
+    }
+</div>
+
+@code {
+    private string _productIdText = string.Empty;
+    private bool _busy;
+    private string _result = string.Empty;
+    private bool _ok;
+
+    private async Task PublishToEtsy()
+    {
+        _result = string.Empty;
+        _ok = false;
+        if (!Guid.TryParse(_productIdText, out var productId))
+        {
+            _result = "Enter a valid product id.";
+            return;
+        }
+
+        try
+        {
+            _busy = true;
+            var resp = await Http.PostAsync($"/api/listings/{productId}/publish/etsy", content: null);
+            if (resp.IsSuccessStatusCode)
+            {
+                var dto = await resp.Content.ReadFromJsonAsync<ResponseDto>();
+                _ok = true;
+                _result = $"Created Etsy listing {dto?.listingId}";
+            }
+            else
+            {
+                var dto = await resp.Content.ReadFromJsonAsync<ErrorDto>();
+                _result = dto?.error ?? $"HTTP {(int)resp.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _result = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private sealed class ResponseDto { public string? listingId { get; set; } }
+    private sealed class ErrorDto { public string? error { get; set; } }
+}
