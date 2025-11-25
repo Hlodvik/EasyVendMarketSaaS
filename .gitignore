@@ -369,3 +369,34 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+
+# .NET user secrets and local settings
+secrets.json
+UserSecrets/
+Properties/launchSettings.json
+appsettings.*.Local.json
+
+# Node / front-end
+node_modules/
+ClientApp/node_modules/
+wwwroot/node_modules/
+# build output from frontend toolchains
+dist/
+build/
+
+# Publish and packaged artifacts
+*.zip
+publish/
+
+# Environment and logs
+.env
+*.log

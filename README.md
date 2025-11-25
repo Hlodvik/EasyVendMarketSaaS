@@ -1,20 +1,48 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# EasyVend
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+EasyVend is a marketplace administration and listing publisher solution built with .NET 9 and Blazor WebAssembly. It provides services for integrating with external marketplaces and a single-page front-end for managing listings, publishing, and monitoring.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Key features
+- Blazor WebAssembly front-end and .NET 9 backend
+- Marketplace integration services (example: Etsy)
+- Listing publishing and management endpoints
+- Designed for cloud deployment (App Service / Key Vault friendly)
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+## Prerequisites
+- .NET 9 SDK (https://dotnet.microsoft.com)
+- Visual Studio 2022/2023 or VS Code (recommended)
+- Node.js (only required if you use front-end toolchains)
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+## Getting started (local development)
+1. Clone the repository:
+   `git clone <repo-url>`
+2. Restore and build:
+   `dotnet restore`
+   `dotnet build`
+3. Run the solution (from solution folder):
+   `dotnet run --project EasyVend`
+4. Open the Blazor WebAssembly client in your browser (the run output will show the URL).
+
+## Configuration
+- Local settings and secrets should not be committed. Use `appsettings.Development.Local.json` or user secrets for credentials.
+- Consider Azure Key Vault or environment variables for production secrets.
+
+## Testing
+- Run unit tests with:
+  `dotnet test`
+
+## Publishing
+- Publish the server app:
+  `dotnet publish -c Release -o ./publish`
+- For Blazor WebAssembly client, publish from the client project or as part of the solution publish.
+
+## Contributing
+- Create a feature branch for each change: `git checkout -b feat/your-change`
+- Open a pull request and describe the purpose and scope of your change
+- Keep secrets out of commits; add sensitive files to `.gitignore`
+
+## License
+This repository does not include a license file. Add a `LICENSE` if you want to permit reuse.
+
+## Contact
+For questions or issues, open an issue on the repository or reach out to the maintainers.
