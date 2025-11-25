@@ -7,12 +7,24 @@ namespace EasyVend.Services
 {
     /// <summary>
     /// Coordinates publishing a product listing to an external marketplace (Etsy for now).
+    ///
+    /// This service is responsible for:
+    ///  - resolving the marketplace integration for a product's tenant,
+    ///  - loading integration credentials (access token, shop id),
+    ///  - calling the marketplace client, and
+    ///  - recording sync logs and created listing records.
     /// </summary>
     public class ListingPublisher(AppDbContext db, IEtsyClient etsy)
     {
         private readonly AppDbContext _db = db;
         private readonly IEtsyClient _etsy = etsy;
 
+        /// <summary>
+        /// Publish the specified product to Etsy. The tenant is inferred from the product row.
+        /// Returns (true, externalListingId) on success or (false, errorMessage) on failure.
+        /// </summary>
+        /// <param name="productId">Local product identifier to publish.</param>
+        /// <param name="ct">Optional cancellation token.</param>
         public async Task<(bool Ok, string Msg)> PublishToEtsyAsync(Guid productId, CancellationToken ct = default)
         {
             var product = await _db.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == productId, ct);
@@ -49,6 +61,7 @@ namespace EasyVend.Services
 
             if (!ok)
             {
+                // Record a failed sync attempt with error details for troubleshooting.
                 _db.IntegrationSyncLogs.Add(new IntegrationSyncLog
                 {
                     SyncLogId = Guid.NewGuid(),
@@ -62,7 +75,7 @@ namespace EasyVend.Services
                 return (false, err);
             }
 
-            // persist listing link + log
+            // Persist listing record and successful sync log
             _db.Listings.Add(new Listing
             {
                 ListingId = Guid.NewGuid(),

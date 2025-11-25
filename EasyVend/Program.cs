@@ -26,6 +26,8 @@ try
         .Enrich.FromLogContext());
 
     // Authentication (Entra ID + OIDC Code+PKCE via OpenIdConnectOptionsSetup)
+    // NOTE: This registers the Microsoft.Identity.Web handlers and configures
+    // OpenIdConnect options. See Auth/OpenIdConnectOptionsSetup for details.
     builder.Services.AddEasyVendAuthentication(builder.Configuration);
 
     // Authorization (modern AddAuthorizationBuilder with fallback policy)
